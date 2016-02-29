@@ -19,32 +19,21 @@ public class Movie implements Comparable<Movie>{
 	private String movieTitle;
 	private String year;
 	private String releaseType;
-	private String romanNumeral;
 	private String[] movieInfo;
 	
 	/**
-	 * Constructor for Movie object when all four components are present in the title
+	 * Constructor for Movie object when all three components are present in the title
 	 * @param movieTitle The title of the movie
-	 * @param romanNumeral The year and Roman numerals in parenthesis to indicate which movie it
-	 * is if multiple movies of the same name were released
 	 * @param releaseType Whether the movie aired on TV or went straight to video
-	 * @param year The year the movie was released
+	 * @param year The year the movie was released, with a roman numeral if two movies have the 
+	 * same name on the same year
 	 */
-	public Movie(String movieTitle, String year, String releaseType, String romanNumeral) {
-		
+	public Movie(String movieTitle, String year, String releaseType) {
+		this.movieTitle = movieTitle;
+		this.year = year;
+		this.releaseType = releaseType;
 	}
-	
-	/**
-	 * Constructor for Movie object when only three of the components are present in the title,
-	 * missing releaseType meaning the movie went straight to theaters
-	 * @param movieTitle title The title of the movie
-	 * @param romanNumeral The year and Roman numerals in parenthesis to indicate which movie it
-	 * is if multiple movies of the same name were released
-	 * @param year The year the movie was released
-	 */
-	public Movie(String movieTitle, String year, String romanNumeral) {
-		
-	}
+
 	
 	/**
 	 * Returns the value stored in movieTitle 
@@ -64,16 +53,6 @@ public class Movie implements Comparable<Movie>{
 	 */
 	public String getYear() {
 		return year;
-	}
-	
-	/**
-	 * Returns the value stored in romanNumeral
-	 * @return Returns the value stored in a String variable
-	 * <dd>PRE - a String variable romanNumeral exists
-	 * <dd>POST - Returns the String stored in the variable romanNumeral
-	 */
-	public String getRomanNumeral() {
-		return romanNumeral;
 	}
 	
 	/**
