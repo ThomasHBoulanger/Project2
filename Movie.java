@@ -1,6 +1,10 @@
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Project #2
@@ -16,11 +20,17 @@ import java.io.IOException;
  * @version 1.0
  */
 public class Movie implements Comparable<Movie>{
-	private String movieTitle;
-	private String year;
-	private String releaseType;
-	private String[] movieInfo;
 	
+	private static String movieTitle;
+	private static String year;
+	private static String releaseType;
+	
+	/**
+	 * Default Constructor
+	 */
+	public Movie(){
+		
+	}
 	/**
 	 * Constructor for Movie object when all three components are present in the title
 	 * @param movieTitle The title of the movie
@@ -29,9 +39,9 @@ public class Movie implements Comparable<Movie>{
 	 * same name on the same year
 	 */
 	public Movie(String movieTitle, String year, String releaseType) {
-		this.movieTitle = movieTitle;
-		this.year = year;
-		this.releaseType = releaseType;
+		Movie.movieTitle = movieTitle;
+		Movie.year = year;
+		Movie.releaseType = releaseType;
 	}
 
 	
@@ -68,7 +78,7 @@ public class Movie implements Comparable<Movie>{
 	/**
 	 * Reads information in file into an Array of Strings as one per line in document
 	 * as a solid string using FileReader and BufferedReader
-	 * @param movieInfo - an Array of Strings used to store contents of the text file
+	 * @param movieInfo - an ArrayList of Strings used to store contents of the text file
 	 * @return The method has a void return type because the method just reads the text file 
 	 * and stores its contents in an Array of Strings, one movie per array element
 	 * @exception IOException must be thrown by any method that does input/output,
@@ -79,27 +89,88 @@ public class Movie implements Comparable<Movie>{
 	 * information in it into an Array of Strings, one line per element, which is to later be
 	 * parsed into separate variables
 	 */
-	public static void readFile(String[] movieInfo) throws IOException {
-		
+	public static void readFile(ArrayList<String> movieInfo) throws IOException {
+		String filename = "testMovieFile.txt";
+		FileReader fr = new FileReader(filename);
+		BufferedReader br = new BufferedReader(fr);
+		String nextLine = "";
+		while(nextLine != null){
+			nextLine = br.readLine();
+			if(nextLine != null){
+				movieInfo.add(nextLine);		
+			}
+		}
+		br.close();
+		Collections.sort(movieInfo);		
 	}
 	
 	/**
-	 * Parses a String Array of movie information one element at a time into different
+	 * Parses a String ArrayList of movie information one element at a time into different
 	 * information to be stored in variables. These variables are then used to construct
 	 * Movie objects to be stored in an ArrayList. Parses using substring.
-	 * @param movieInfo - A String Array containing the movie information held on a single line
+	 * @param movieInfo - A String ArrayList containing the movie information held on a single line
 	 * for a movie from the text file 
+	 * @param movieList - A Movie ArrayList containing the movie information in a Movie object 
 	 * @return The method has a void return type because the method just parses elements of a
-	 * String Array into Strings and assigns them to variables, each a different 
+	 * String ArrayList into Strings and assigns them to variables, each a different 
 	 * component of the movie
-	 * <dd>PRE - There must be an Array of Movie information, the elements of this Array are 
+	 * <dd>PRE - There must be an ArrayList of Movie information, the elements of this Array are 
 	 * set to a String variable, one per line in the text file
-	 * <dd>POST - The method parses the elements of a String Array into String variables, one
+	 * <dd>POST - The method parses the elements of a String ArrayList into String variables, one
 	 * for each of the components a movie in the text file may have so that they can be 
 	 * used to construct a Movie object
 	 */
-	public void parseMovie(String[] movieInfo) {
+	public static void parseMovie(ArrayList<String> movieInfo, ArrayList<Movie> movieList) {
+		String[] tempArray;
+		String tempYear;
+		String tempTitle;
+		String tempRelease;
 		
+		for(int index = 0; index < movieInfo.size(); ++index){
+			tempArray = movieInfo.get(index).split(" ");
+			
+			//getting the year
+			tempYear = tempArray[tempArray.length - 1];
+			
+			//getting the release type
+			if(Arrays.asList(tempArray).contains("(V)")){
+				tempRelease = tempArray[Arrays.asList(tempArray).indexOf("(V)")];
+			}
+			else if(Arrays.asList(tempArray).contains("(TV)")){
+				tempRelease = tempArray[Arrays.asList(tempArray).indexOf("(TV)")];
+			}
+			else{
+				tempRelease = " ";
+			}
+			//checks for a roman numeral and adds it to year
+			if(Arrays.asList(tempArray).contains("(" + tempYear + "/I)")){
+				tempYear += "/I";
+			}
+			else if(Arrays.asList(tempArray).contains("(" + tempYear + "/II)")){
+				tempYear += "/II";
+			}
+			else if(Arrays.asList(tempArray).contains("(" + tempYear + "/III)")){
+				tempYear += "/III";
+			}
+			else if(Arrays.asList(tempArray).contains("(" + tempYear + "/IV)")){
+				tempYear += "/IV";
+			}
+			else if(Arrays.asList(tempArray).contains("(" + tempYear + "/V)")){
+				tempYear += "/V";
+			}
+			
+			//getting the title
+			int endOfTitle = Arrays.asList(tempArray).indexOf("(" + tempYear + ")");
+			tempTitle = tempArray[0];
+			for(int count = 1; count < endOfTitle; ++count){
+				tempTitle = tempTitle + " " + tempArray[count];
+			}
+			movieList.add(new Movie(tempTitle, tempYear, tempRelease));
+		}
+	}
+
+	public static String toString(Movie movie){
+		return movie.getMovieTitle() + " " + movie.getYear() + " " + movie.getReleaseType();
 	}
 	
 	/**
@@ -114,7 +185,7 @@ public class Movie implements Comparable<Movie>{
 	 */
 	@Override
 	public int compareTo(Movie movie) {
-		return 0;
+		return movieTitle.compareTo(movie.getMovieTitle());
 	}
 	
 	/**
@@ -124,7 +195,7 @@ public class Movie implements Comparable<Movie>{
 	 */
 	public static final Comparator<Movie> MOVIE_YEAR_COMPARATOR = new Comparator<Movie>() {
 		public int compare(Movie movie, Movie anotherMovie) {
-			return 0;
+			return movie.getYear().compareTo(anotherMovie.getYear());
 		}
 	};
 }
