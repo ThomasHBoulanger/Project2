@@ -215,7 +215,7 @@ public class Episode implements Comparable<Episode>{
 	 * @return String representing the contents of this object.
 	 */
 	public String toString() {
-		String attributesAsString = "Episode: ";
+		String attributesAsString = "";
 		if (this.episodeName != null) {
 			attributesAsString += this.episodeName + ", ";
 		}
@@ -253,4 +253,3 @@ public class Episode implements Comparable<Episode>{
 			return episode.getYear().compareTo(anotherEpisode.getYear());
 		}
 	};
-}
