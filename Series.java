@@ -1,5 +1,9 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 /**
@@ -19,10 +23,7 @@ public class Series implements Comparable<Series> {
 	private String seriesTitle;
 	private String seriesStartYear;
 	private String seriesEndYear;
-	private String episodeYear;
-	private String episodeTitle;
-	private String seasonNum;
-	private String episodeNum;
+	private static ArrayList<Episode> episodes = new ArrayList<Episode>();
 	private String[] seriesInfo;
 	
 	/**
@@ -30,25 +31,23 @@ public class Series implements Comparable<Series> {
 	 * @param seriesTitle The title of the series
 	 * @param seriesYear The year the series debutted
 	 */
-	public Series(String seriesTitle, String seriesYear) {
-		
+	public Series(String seriesTitle, String seriesStartYear, String seriesEndYear, 
+			ArrayList<Episode> TVList) {
+		this.seriesTitle = seriesTitle;
+		this.seriesStartYear = seriesStartYear;
+		this.seriesEndYear = seriesEndYear;
+		Series.episodes = TVList;
 	}
 	
-	/**
-	 *Constructor for Series object when all of the components are present in the title
-	 * @param seriesTitle The title of the series
-	 * @param seriesYear The year the series debutted
-	 * @param episodeYear The year the episode debutted
-	 * @param episodeTitle The title of the episode
-	 * @param seasonNum The number of which season the episode is in
-	 * @param episodeNum The number of the episode
-	 */
-	public Series(String seriesTitle, String seriesYear, String episodeYear, 
-			String episodeTitle, String seasonNum, String episodeNum) {
-		
+	public static ArrayList<Episode> episodeList(String seriesTitle, ArrayList<Episode> TVList){
+		for(int count = 0; count < TVList.size(); ++count){
+			if(TVList.get(count).getSeries() == seriesTitle){
+				episodes.add(TVList.get(count));
+			}
+		}
+		return TVList;
 	}
 	
-
 	/**
 	 * Returns the value stored in seriesTitle 
 	 * @return Returns the value stored in a String variable
@@ -81,52 +80,30 @@ public class Series implements Comparable<Series> {
 	}
 
 	/**
-	 * Returns the value stored in episodeYear 
-	 * @return Returns the value stored in a String variable
-	 * <dd>PRE - a String variable episodeYeare exists
-	 * <dd>POST - Returns the String stored in the variable episodeYear
+	 * Adds an episode to this series
+	 * 
+	 * @param newEp the episode to be added
 	 */
-	public String getEpisodeYear() {
-		return episodeYear;
+	public void add(Episode newEp) {
+		
+		episodes.add(newEp);
+		
 	}
 	
 
 	/**
-	 * Returns the value stored in episodeTitle 
-	 * @return Returns the value stored in a String variable
-	 * <dd>PRE - a String variable episodeTitle exists
-	 * <dd>POST - Returns the String stored in the variable episodeTitle
+	 * @return episodes
 	 */
-	public String getEpisodeTitle() {
-		return episodeTitle;
-	}
-	
-
-	/**
-	 * Returns the value stored in seasonNum 
-	 * @return Returns the value stored in a String variable
-	 * <dd>PRE - a String variable seasonNum exists
-	 * <dd>POST - Returns the String stored in the variable seasonNum
-	 */
-	public String getSeasonNum() {
-		return seasonNum;
-	}
-	
-
-	/**
-	 * Returns the value stored in episodeNum 
-	 * @return Returns the value stored in a String variable
-	 * <dd>PRE - a String variable episodeNum exists
-	 * <dd>POST - Returns the String stored in the variable episodeNum
-	 */
-	public String getEpisodeNum() {
-		return episodeNum;
+	public ArrayList<Episode> getEpisodes() {
+		
+		return episodes;
+		
 	}
 	
 	/**
 	 * Reads information in file into an Array of Strings as one per line in document
 	 * as a solid string using FileReader and BufferedReader
-	 * @param seriesInfo - an Array of Strings used to store contents of the text file
+	 * @param seriesInfo2 - an Array of Strings used to store contents of the text file
 	 * @return The method has a void return type because the method just reads the text file 
 	 * and stores its contents in an Array of Strings, one series per array element
 	 * @exception IOException must be thrown by any method that does input/output,
@@ -137,8 +114,19 @@ public class Series implements Comparable<Series> {
 	 * information in it into an Array of Strings, one line per element, which is to later be
 	 * parsed into separate variables
 	 */
-	public static void readFile(String[] seriesInfo) throws IOException {
-		
+	public static void readFile(ArrayList<String> seriesInfo) throws IOException {
+		String filename = "testTVFile.txt";
+		FileReader fr = new FileReader(filename);
+		BufferedReader br = new BufferedReader(fr);
+		String nextLine = "";
+		while(nextLine != null){
+			nextLine = br.readLine();
+			if(nextLine != null){
+				seriesInfo.add(nextLine);		
+			}
+		}
+		br.close();
+		Collections.sort(seriesInfo);	
 	}
 	
 	/**
@@ -156,8 +144,30 @@ public class Series implements Comparable<Series> {
 	 * for each of the components a series in the text file may have so that they can be 
 	 * used to construct a Series object
 	 */
-	public void parseSeries(String[] seriesInfo) {
+	public static void parseSeries(ArrayList<String> seriesInfo, ArrayList<Series> seriesList
+			, ArrayList<Episode> TVList) {
+		String[] tempArray;
+		String[] yearTemp;
+		String tempStartYear;
+		String tempEndYear;
+		String tempTitle;
 		
+		for(int index = 0; index < seriesInfo.size(); ++index){
+			tempArray = seriesInfo.get(index).split("[\\s\\xA0]+");
+			if(tempArray[tempArray.length - 1].contains("-")){
+				yearTemp = tempArray[tempArray.length - 1].split("-");
+				tempStartYear = yearTemp[0];
+				tempEndYear = yearTemp[1];
+				
+				int endOfTitle = Arrays.asList(tempArray).indexOf("(" + tempStartYear + ")");
+				tempTitle = tempArray[0];
+				for(int count = 1; count < endOfTitle; ++count){
+					tempTitle = tempTitle + " " + tempArray[count];
+				}
+				seriesList.add(new Series(tempTitle, tempStartYear, tempEndYear
+						, episodeList(tempTitle, TVList)));
+			}
+		}
 	}
 	
 	/**
@@ -172,7 +182,7 @@ public class Series implements Comparable<Series> {
 	 */
 	@Override
 	public int compareTo(Series series) {
-		return 0;
+		return this.seriesTitle.compareTo(series.getSeriesTitle());
 	}
 	
 	/**
@@ -181,8 +191,12 @@ public class Series implements Comparable<Series> {
 	 * than, equal to, or greater than the second. Used to sort seriesList by year.
 	 */
 	public static final Comparator<Series> SERIES_YEAR_COMPARATOR = new Comparator<Series>() {
-		public int compare(Series series, Series anotherSeries) {
-			return 0;
+		public int compare(Series seriesA, Series seriesB) {
+			if (Integer.parseInt(seriesA.getSeriesStartYear()) > Integer.parseInt(seriesB.getSeriesStartYear())) {
+				return 1;
+			} else if (Integer.parseInt(seriesA.getSeriesStartYear()) < Integer.parseInt(seriesB.getSeriesStartYear())) {
+				return -1;
+			} else return 0;
 		}
 	};
 }
